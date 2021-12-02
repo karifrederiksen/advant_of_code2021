@@ -1,4 +1,7 @@
-type Val = i32;
+#![feature(test)]
+extern crate test;
+
+type Val = i64;
 
 #[derive(Copy, Clone, Debug)]
 enum Instr {
@@ -66,8 +69,11 @@ fn eval_v2(moves: &[Instr]) -> (Val, Val) {
 
 fn main() {
     let moves = parse(&include_str!("inputs"));
-    println!("Part1 = {:?}", answer(eval_v1(&moves)));
-    println!("Part2 = {:?}", answer(eval_v2(&moves)));
+    println!(
+        "Part1 = {}\nPart2 = {}",
+        answer(eval_v1(&moves)),
+        answer(eval_v2(&moves))
+    );
 }
 
 #[cfg(test)]
@@ -86,5 +92,29 @@ forward 2";
         let moves = parse(TEST_INPUT);
         assert_eq!(answer(eval_v1(&moves)), 150);
         assert_eq!(answer(eval_v2(&moves)), 900);
+    }
+
+    #[bench]
+    fn _parse(b: &mut test::Bencher) {
+        let input = include_str!("inputs");
+        b.iter(|| {
+            test::black_box(parse(input));
+        });
+    }
+
+    #[bench]
+    fn _eval_v1(b: &mut test::Bencher) {
+        let moves = parse(include_str!("inputs"));
+        b.iter(|| {
+            test::black_box(eval_v1(&moves));
+        });
+    }
+
+    #[bench]
+    fn _eval_v2(b: &mut test::Bencher) {
+        let moves = parse(include_str!("inputs"));
+        b.iter(|| {
+            test::black_box(eval_v2(&moves));
+        });
     }
 }

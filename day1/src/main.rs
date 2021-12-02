@@ -1,3 +1,6 @@
+#![feature(test)]
+extern crate test;
+
 fn parse(s: &str) -> Vec<u32> {
     s.split("\n")
         .filter_map(|s| s.parse::<u32>().ok())
@@ -17,8 +20,11 @@ fn count_increasing(window_size: usize, meas: &[u32]) -> u32 {
 
 fn main() {
     let measurements = parse(include_str!("inputs"));
-    println!("Part1 = {}", count_increasing(1, &measurements));
-    println!("Part2 = {}", count_increasing(3, &measurements));
+    println!(
+        "Part1 = {}\nPart2 = {}",
+        count_increasing(1, &measurements),
+        count_increasing(3, &measurements)
+    );
 }
 
 #[cfg(test)]
@@ -41,5 +47,29 @@ mod tests {
         let data = parse(EXAMPLE_DATA);
         assert_eq!(count_increasing(1, &data), 7);
         assert_eq!(count_increasing(3, &data), 5);
+    }
+
+    #[bench]
+    fn _parse(b: &mut test::Bencher) {
+        let input = include_str!("inputs");
+        b.iter(|| {
+            test::black_box(parse(input));
+        });
+    }
+
+    #[bench]
+    fn _count_increasing_1(b: &mut test::Bencher) {
+        let meas = parse(include_str!("inputs"));
+        b.iter(|| {
+            test::black_box(count_increasing(1, &meas));
+        });
+    }
+
+    #[bench]
+    fn _count_increasing_3(b: &mut test::Bencher) {
+        let meas = parse(include_str!("inputs"));
+        b.iter(|| {
+            test::black_box(count_increasing(3, &meas));
+        });
     }
 }
