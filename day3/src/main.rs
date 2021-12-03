@@ -11,15 +11,9 @@ fn parse(s: &str) -> Vec<BitVec> {
 
 fn gamma_rate(lines: &[BitVec]) -> BitVec {
     assert!(lines.len() > 0, "requires 1 or more samples");
-    let mut counts: Vec<i32> = vec![0; lines[0].len()];
-
-    for line in lines {
-        for i in 0..line.len() {
-            counts[i] += if line[i] { 1 } else { -1 };
-        }
-    }
-    // n == 0 is undefined ...
-    counts.into_iter().map(|n| n >= 0).collect()
+    (0..lines[0].len())
+        .map(|i| lines.iter().map(|l| if l[i] { 1 } else { -1 }).sum::<i32>() >= 0)
+        .collect::<BitVec>()
 }
 
 fn epsilon_rate(gamma: &BitVec) -> BitVec {
@@ -37,7 +31,7 @@ fn oxygen_generator_rating_base<P>(lines: &[BitVec], mut p: P) -> BitVec
 where
     P: FnMut(usize, usize) -> bool,
 {
-    let mut lines: Vec<_> = lines.iter().cloned().collect();
+    let mut lines: Vec<_> = lines.iter().collect();
 
     assert!(lines.len() > 0, "requires 1 or more samples");
     for i in 0..lines[0].len() {
