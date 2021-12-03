@@ -2,6 +2,5 @@
 members = [
   "day1",
   "day2",
+  "day3",
 ]
-
-default-members = ["day2"]
