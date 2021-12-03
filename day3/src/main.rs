@@ -1,11 +1,11 @@
 #![feature(test)]
 extern crate test;
 
-type BitVec = bit_vec::BitVec<u32>;
+type BitVec = Vec<bool>;
 
 fn parse(s: &str) -> Vec<BitVec> {
     s.split('\n')
-        .map(|l| BitVec::from_iter(l.chars().map(|x| x == '1')))
+        .map(|l| l.chars().map(|x| x == '1').collect::<BitVec>())
         .collect()
 }
 
@@ -17,9 +17,7 @@ fn gamma_rate(lines: &[BitVec]) -> BitVec {
 }
 
 fn epsilon_rate(gamma: &BitVec) -> BitVec {
-    let mut epsilon: BitVec = BitVec::from_elem(gamma.len(), true);
-    epsilon.xor(gamma);
-    epsilon
+    gamma.into_iter().map(|x| !x).collect()
 }
 
 fn to_decimal(xs: BitVec) -> u64 {
