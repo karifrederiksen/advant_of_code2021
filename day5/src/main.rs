@@ -4,21 +4,22 @@ extern crate test;
 type Vec2 = (i32, i32);
 
 fn parse(s: &str) -> Vec<(Vec2, Vec2)> {
-    s.split('\n').map(|l| {
-        let (l, r) = l.split_once(" -> ").expect("arrow");
-        let (x1, y1) = l.split_once(',').expect("left comma");
-        let (x2, y2) = r.split_once(',').expect("right comma");
-        let start = (
-            x1.parse::<i32>().expect("x1"),
-            y1.parse::<i32>().expect("y1"),
-        );
-        let end =
-        (
-            x2.parse::<i32>().expect("x2"),
-            y2.parse::<i32>().expect("y2"),
-        );
-        (start, end)
-    }).collect()
+    s.split('\n')
+        .map(|l| {
+            let (l, r) = l.split_once(" -> ").expect("arrow");
+            let (x1, y1) = l.split_once(',').expect("left comma");
+            let (x2, y2) = r.split_once(',').expect("right comma");
+            let start = (
+                x1.parse::<i32>().expect("x1"),
+                y1.parse::<i32>().expect("y1"),
+            );
+            let end = (
+                x2.parse::<i32>().expect("x2"),
+                y2.parse::<i32>().expect("y2"),
+            );
+            (start, end)
+        })
+        .collect()
 }
 
 struct Grid {
@@ -35,12 +36,11 @@ impl Grid {
             if !diagonal && start.0 != end.0 && start.1 != end.1 {
                 continue;
             }
-            let (start, end) =
-                if start.0 <= end.0 {
-                    (start, end)
-                } else {
-                    (end, start)
-                };
+            let (start, end) = if start.0 <= end.0 {
+                (start, end)
+            } else {
+                (end, start)
+            };
             let v = (
                 (end.0 - start.0).clamp(-1, 1),
                 (end.1 - start.1).clamp(-1, 1),
@@ -58,11 +58,11 @@ impl Grid {
     fn dimensions(vents: &[(Vec2, Vec2)]) -> (usize, usize) {
         let mut x_max = usize::MIN;
         let mut y_max = usize::MIN;
-    
+
         for (x1, x2, y1, y2) in vents
             .iter()
-            .map(|&((x1, y1), (x2, y2))| (x1 as usize, x2 as usize, y1 as usize, y2 as usize)
-        ) {
+            .map(|&((x1, y1), (x2, y2))| (x1 as usize, x2 as usize, y1 as usize, y2 as usize))
+        {
             // x_max = usize::max(x_max, usize::max(x1, x2));
             if x1 > x_max {
                 x_max = x1;
@@ -82,20 +82,21 @@ impl Grid {
 
     pub fn dangerous_vents(&self) -> u32 {
         let mut count = 0;
-    
+
         for n in &self.grid {
             if *n >= 2 {
                 count += 1;
             }
         }
-    
+
         count
     }
 
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut s = String::new();
 
-        for (i,  &n) in self.grid.iter().enumerate() {
+        for (i, &n) in self.grid.iter().enumerate() {
             if n == 0 {
                 s.push('.');
             } else {
@@ -122,7 +123,11 @@ fn answer_part2(vents: &[(Vec2, Vec2)]) -> u32 {
 
 fn main() {
     let vents = parse(include_str!("inputs"));
-    println!("Part 1 = {}\nPart 2 = {}", answer_part1(&vents), answer_part2(&vents));
+    println!(
+        "Part 1 = {}\nPart 2 = {}",
+        answer_part1(&vents),
+        answer_part2(&vents)
+    );
 }
 
 #[cfg(test)]
