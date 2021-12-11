@@ -1,32 +1,89 @@
 #![feature(test)]
 extern crate test;
-use std::collections::HashSet;
+use std::fmt;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct CharSet {
+    buf: [char; 7],
+    len: u8,
+}
+
+impl CharSet {
+    fn from_str(s: &str) -> Self {
+        let mut buf = ['~'; 7];
+        let mut i = 0;
+        for c in s.chars() {
+            buf[i] = c;
+            i += 1;
+        }
+        buf.sort();
+        Self { buf, len: i as u8 }
+    }
+
+    fn len(&self) -> usize {
+        self.len as usize
+    }
+
+    fn is_superset(&self, other: &Self) -> bool {
+        (0..other.len()).all(|i| self.buf[..self.len()].contains(&other.buf[i]))
+    }
+
+    fn except(&mut self, other: &Self) {
+        let mut remove_count = 0;
+        for &c in &other.buf[..other.len()] {
+            for i in 0..self.len() {
+                if self.buf[i] == c {
+                    self.buf[i] = '~';
+                    remove_count += 1;
+                }
+            }
+        }
+        self.buf.sort();
+        self.len -= remove_count;
+    }
+}
+
+impl Default for CharSet {
+    fn default() -> Self {
+        Self {
+            buf: ['~'; 7],
+            len: 0,
+        }
+    }
+}
+
+impl fmt::Debug for CharSet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "\"")?;
+        for &c in &self.buf[..self.len()] {
+            write!(f, "{}", c)?;
+        }
+        write!(f, "\"")
+    }
+}
 
 #[derive(Debug)]
 struct Data {
-    samples: [String; 10],
-    outputs: [String; 4],
+    samples: [CharSet; 10],
+    outputs: [CharSet; 4],
 }
 
 fn parse_line(s: &str) -> Data {
     let (part1, part2) = s.split_once('|').expect("delimited");
-    let mut patterns: [String; 10] = Default::default();
+    let mut samples: [CharSet; 10] = Default::default();
     let mut i = 0;
     for s in part1.split(' ').filter(|&s| s != "") {
-        patterns[i] = s.to_string();
+        samples[i] = CharSet::from_str(s);
         i += 1;
     }
-    let mut outputs: [String; 4] = Default::default();
+    let mut outputs: [CharSet; 4] = Default::default();
     let mut i = 0;
     for s in part2.split(' ').filter(|&s| s != "") {
-        outputs[i] = s.to_string();
+        outputs[i] = CharSet::from_str(s);
         i += 1;
     }
 
-    Data {
-        samples: patterns,
-        outputs,
-    }
+    Data { samples, outputs }
 }
 
 fn parse(s: &str) -> Vec<Data> {
@@ -46,53 +103,50 @@ fn answer_part1(data: &[Data]) -> usize {
 }
 
 fn decode(data: &Data) -> u64 {
-    let mut map: [HashSet<char>; 10] = Default::default();
-    for pat in data.samples.iter().chain(&data.outputs) {
+    let mut map: [CharSet; 10] = Default::default();
+    for pat in data.samples.iter() {
         match pat.len() {
-            2 => map[1] = pat.chars().collect(),
-            3 => map[7] = pat.chars().collect(),
-            4 => map[4] = pat.chars().collect(),
-            7 => map[8] = pat.chars().collect(),
+            2 => map[1] = *pat,
+            3 => map[7] = *pat,
+            4 => map[4] = *pat,
+            7 => map[8] = *pat,
             _ => {}
         }
     }
     let mut fourdiff = map[4].clone();
-    fourdiff.retain(|c| !map[1].contains(c));
+    fourdiff.except(&map[1]);
 
-    for pat in data.samples.iter().chain(&data.outputs) {
-        let pat: HashSet<char> = pat.chars().collect();
+    for pat in data.samples.iter() {
         match pat.len() {
             5 => {
                 if pat.is_superset(&map[1]) {
-                    map[3] = pat;
+                    map[3] = *pat;
                 } else if pat.is_superset(&fourdiff) {
-                    map[5] = pat;
+                    map[5] = *pat;
                 } else {
-                    map[2] = pat;
+                    map[2] = *pat;
                 }
             }
             6 => {
                 if pat.is_superset(&map[4]) {
-                    map[9] = pat;
+                    map[9] = *pat;
                 } else if pat.is_superset(&map[1]) {
-                    map[0] = pat;
+                    map[0] = *pat;
                 } else {
-                    map[6] = pat;
+                    map[6] = *pat;
                 }
             }
             _ => {}
         }
     }
-
     data.outputs
         .iter()
         .enumerate()
         .map(|(i, o)| {
-            let o: HashSet<char> = o.chars().collect();
             let n = map
                 .iter()
                 .enumerate()
-                .filter(|x| x.1 == &o)
+                .filter(|x| x.1 == o)
                 .map(|x| x.0)
                 .nth(0)
                 .unwrap() as u64;
