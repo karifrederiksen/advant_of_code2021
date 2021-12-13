@@ -29,18 +29,18 @@ mod tests {
     const EXAMPLE_INPUT: &'static str = "";
 
     #[test]
-    fn test_part1() {
+    fn _part1() {
         let inputs = parse(EXAMPLE_INPUT);
         assert_eq!(0, answer_part1(&inputs));
     }
     #[test]
-    fn test_part2() {
+    fn _part2() {
         let inputs = parse(EXAMPLE_INPUT);
         assert_eq!(0, answer_part2(&inputs));
     }
 
     #[bench]
-    fn _parse(b: &mut test::Bencher) {
+    fn bench_parse(b: &mut test::Bencher) {
         let input = include_str!("inputs");
         b.iter(|| {
             test::black_box(parse(input));
@@ -48,7 +48,7 @@ mod tests {
     }
 
     #[bench]
-    fn _answer_part1(b: &mut test::Bencher) {
+    fn bench_answer_part1(b: &mut test::Bencher) {
         let inputs = parse(include_str!("inputs"));
         b.iter(|| {
             test::black_box(answer_part1(&inputs));
@@ -56,7 +56,7 @@ mod tests {
     }
 
     #[bench]
-    fn _answer_part2(b: &mut test::Bencher) {
+    fn bench_answer_part2(b: &mut test::Bencher) {
         let inputs = parse(include_str!("inputs"));
         b.iter(|| {
             test::black_box(answer_part2(&inputs));
